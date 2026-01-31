@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idea to Mockup Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .panel h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel h2 .icon {
+            font-size: 1.5rem;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s;
+            line-height: 1.8;
+        }
+
+        .input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-section textarea::placeholder {
+            color: #aaa;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .output-section {
+            min-height: 400px;
+        }
+
+        .output-content {
+            display: none;
+        }
+
+        .output-content.active {
+            display: block;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        .placeholder .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .app-proposal {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .app-proposal h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .app-name {
+            font-size: 1.8rem;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .app-description {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section h4 {
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 10px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-list li strong {
+            color: #333;
+        }
+
+        .feature-list li p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .screen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .screen-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .screen-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .screen-card .screen-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .screen-card .screen-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .examples {
+            margin-top: 16px;
+            padding: 16px;
+            background: #fff8e1;
+            border-radius: 12px;
+            border: 1px solid #ffcc02;
+        }
+
+        .examples h5 {
+            color: #f57c00;
+            margin-bottom: 8px;
+        }
+
+        .examples ul {
+            list-style: none;
+            color: #666;
+        }
+
+        .examples li {
+            cursor: pointer;
+            padding: 4px 0;
+            transition: color 0.3s;
+        }
+
+        .examples li:hover {
+            color: #667eea;
+        }
+
+        .examples li::before {
+            content: "💡 ";
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💡 Idea to Mockup Generator</h1>
+            <p>アイデアを入力すると、あなたが欲しいアプリを図解付きで提案します</p>
+        </header>
+
+        <div class="main-content">
+            <div class="panel input-section">
+                <h2><span class="icon">📝</span> アイデアを入力</h2>
+                <textarea id="ideaInput" placeholder="アイデアを箇条書きや文章で入力してください...
+
+例:
+- タスク管理アプリ
+- カテゴリ分けができる
+- 期限を設定できる
+- リマインダー機能
+- チームで共有したい"></textarea>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generateMockup()">
+                        🚀 ドキュメント生成
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearInput()">
+                        🗑️ クリア
+                    </button>
+                </div>
+
+                <div class="examples">
+                    <h5>入力例（クリックで挿入）</h5>
+                    <ul>
+                        <li onclick="insertExample(1)">タスク管理アプリのアイデア</li>
+                        <li onclick="insertExample(2)">レシピ共有サービスのアイデア</li>
+                        <li onclick="insertExample(3)">習慣トラッカーアプリのアイデア</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel output-section">
+                <h2><span class="icon">📄</span> 生成されたドキュメント</h2>
+
+                <div class="placeholder" id="placeholder">
+                    <div class="icon">🎨</div>
+                    <p>左側にアイデアを入力して<br>「ドキュメント生成」をクリックしてください</p>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>アイデアを解析中...</p>
+                </div>
+
+                <div class="output-content" id="outputContent">
+                    <!-- 生成されたコンテンツがここに表示される -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mermaid初期化
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        // サンプルデータ
+        const examples = {
+            1: `タスク管理アプリを作りたい
+- カテゴリ分けができる（仕事、プライベート、買い物など）
+- タスクに期限を設定できる
+- 優先度を設定できる（高・中・低）
+- リマインダー通知機能
+- チームメンバーと共有できる
+- 完了したタスクの統計を見たい`,
+            2: `レシピ共有サービス
+- 自分のレシピを投稿できる
+- 写真付きで手順を説明
+- 材料と分量を入力
+- 他のユーザーのレシピを検索
+- お気に入り保存機能
+- カロリー計算
+- 買い物リスト自動生成`,
+            3: `習慣トラッカーアプリ
+- 毎日の習慣を登録
+- カレンダー形式で達成状況を確認
+- 連続達成日数の表示
+- 週間・月間のレポート
+- モチベーションを上げる通知
+- 習慣のカテゴリ分け
+- 達成率のグラフ表示`
+        };
+
+        function insertExample(num) {
+            document.getElementById('ideaInput').value = examples[num];
+        }
+
+        function clearInput() {
+            document.getElementById('ideaInput').value = '';
+            document.getElementById('placeholder').style.display = 'flex';
+            document.getElementById('outputContent').classList.remove('active');
+        }
+
+        function generateMockup() {
+            const input = document.getElementById('ideaInput').value.trim();
+            if (!input) {
+                alert('アイデアを入力してください');
+                return;
+            }
+
+            // ローディング表示
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('outputContent').classList.remove('active');
+
+            // 解析処理（少し遅延させてUX向上）
+            setTimeout(() => {
+                const analysis = analyzeIdea(input);
+                const html = generateDocument(analysis);
+
+                document.getElementById('outputContent').innerHTML = html;
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('outputContent').classList.add('active');
+
+                // Mermaid図を再レンダリング
+                renderMermaidDiagrams();
+            }, 800);
+        }
+
+        function analyzeIdea(input) {
+            const lines = input.split('\n').filter(line => line.trim());
+
+            // アプリ名の推定
+            let appName = '';
+            let description = '';
+            const features = [];
+            const screens = [];
+            const techStack = [];
+
+            // キーワード分析
+            const keywords = {
+                task: ['タスク', 'todo', 'やること', '管理'],
+                recipe: ['レシピ', '料理', '食事', '材料'],
+                habit: ['習慣', 'トラッカー', '継続', '毎日'],
+                social: ['共有', 'シェア', 'チーム', 'メンバー', '投稿', 'フォロー'],
+                calendar: ['カレンダー', '日付', '期限', '予定', 'スケジュール'],
+                notification: ['通知', 'リマインダー', 'アラート', 'お知らせ'],
+                statistics: ['統計', 'レポート', 'グラフ', '分析', '達成率'],
+                search: ['検索', '探す', 'フィルター'],
+                favorite: ['お気に入り', '保存', 'ブックマーク'],
+                category: ['カテゴリ', '分類', '種類', 'タグ']
+            };
+
+            const inputLower = input.toLowerCase();
+            const detectedFeatures = new Set();
+
+            // 最初の行からアプリ名を推定
+            const firstLine = lines[0];
+            if (firstLine.includes('アプリ') || firstLine.includes('サービス') || firstLine.includes('ツール')) {
+                appName = firstLine.replace(/[-・]/g, '').trim();
+            } else {
+                // キーワードからアプリ名を推定
+                if (keywords.task.some(k => inputLower.includes(k))) {
+                    appName = 'タスクマネージャー';
+                } else if (keywords.recipe.some(k => inputLower.includes(k))) {
+                    appName = 'レシピシェア';
+                } else if (keywords.habit.some(k => inputLower.includes(k))) {
+                    appName = '習慣トラッカー';
+                } else {
+                    appName = 'マイアプリ';
+                }
+            }
+
+            // 機能の抽出
+            lines.forEach(line => {
+                const cleanLine = line.replace(/^[-・\*]\s*/, '').trim();
+                if (cleanLine && cleanLine !== firstLine) {
+                    features.push({
+                        name: cleanLine,
+                        description: generateFeatureDescription(cleanLine)
+                    });
+                }
+            });
+
+            // 検出されたキーワードから画面を推定
+            screens.push({ name: 'ホーム', icon: '🏠' });
+
+            if (keywords.task.some(k => inputLower.includes(k))) {
+                screens.push({ name: 'タスク一覧', icon: '📋' });
+                screens.push({ name: 'タスク追加', icon: '➕' });
+            }
+            if (keywords.calendar.some(k => inputLower.includes(k))) {
+                screens.push({ name: 'カレンダー', icon: '📅' });
+            }
+            if (keywords.statistics.some(k => inputLower.includes(k))) {
+                screens.push({ name: '統計・レポート', icon: '📊' });
+            }
+            if (keywords.search.some(k => inputLower.includes(k))) {
+                screens.push({ name: '検索', icon: '🔍' });
+            }
+            if (keywords.social.some(k => inputLower.includes(k))) {
+                screens.push({ name: 'プロフィール', icon: '👤' });
+            }
+            screens.push({ name: '設定', icon: '⚙️' });
+
+            // 技術スタックの推定
+            techStack.push('React / Vue.js');
+            techStack.push('TypeScript');
+            if (keywords.social.some(k => inputLower.includes(k))) {
+                techStack.push('Firebase / Supabase');
+                techStack.push('PostgreSQL');
+            } else {
+                techStack.push('LocalStorage / IndexedDB');
+            }
+            if (keywords.notification.some(k => inputLower.includes(k))) {
+                techStack.push('Push Notification API');
+            }
+            if (keywords.statistics.some(k => inputLower.includes(k))) {
+                techStack.push('Chart.js / Recharts');
+            }
+
+            // 説明文の生成
+            description = `${features.length}つの主要機能を持つ${appName}です。`;
+
+            return {
+                appName,
+                description,
+                features,
+                screens,
+                techStack,
+                originalInput: input
+            };
+        }
+
+        function generateFeatureDescription(feature) {
+            const descriptions = {
+                'カテゴリ': '項目を整理して効率的に管理できます',
+                '期限': 'デッドラインを設定して計画的に進められます',
+                '優先度': '重要なものから順に取り組めます',
+                '通知': '忘れずにアクションを起こせます',
+                'リマインダー': '適切なタイミングでお知らせします',
+                '共有': 'チームやフレンドと情報を共有できます',
+                '統計': 'データを可視化して振り返りができます',
+                'レポート': '活動の分析結果を確認できます',
+                '検索': '必要な情報をすぐに見つけられます',
+                'お気に入り': 'よく使う項目にすぐアクセスできます',
+                '写真': 'ビジュアルで分かりやすく記録できます',
+                'グラフ': '進捗を視覚的に把握できます'
+            };
+
+            for (const [key, desc] of Object.entries(descriptions)) {
+                if (feature.includes(key)) {
+                    return desc;
+                }
+            }
+            return 'ユーザー体験を向上させる機能です';
+        }
+
+        function generateDocument(analysis) {
+            const flowDiagram = generateFlowDiagram(analysis);
+            const screenDiagram = generateScreenDiagram(analysis);
+
+            return `
+                <div class="app-proposal">
+                    <h3>🎯 あなたが欲しいアプリはこれですか？</h3>
+                    <div class="app-name">${analysis.appName}</div>
+                    <p class="app-description">${analysis.description}</p>
+                </div>
+
+                <div class="section">
+                    <h4>✨ 主な機能</h4>
+                    <ul class="feature-list">
+                        ${analysis.features.map(f => `
+                            <li>
+                                <strong>${f.name}</strong>
+                                <p>${f.description}</p>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h4>🔄 ユーザーフロー図</h4>
+                    <div class="diagram-container">
+                        <pre class="mermaid">${flowDiagram}</pre>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>📱 画面構成</h4>
+                    <div class="screen-grid">
+                        ${analysis.screens.map(s => `
+                            <div class="screen-card">
+                                <div class="screen-icon">${s.icon}</div>
+                                <div class="screen-name">${s.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>🔗 画面遷移図</h4>
+                    <div class="diagram-container">
+                        <pre class="mermaid">${screenDiagram}</pre>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4>🛠️ 推奨技術スタック</h4>
+                    <div class="tech-stack">
+                        ${analysis.techStack.map(t => `
+                            <span class="tech-badge">${t}</span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateFlowDiagram(analysis) {
+            const hasAuth = analysis.features.some(f =>
+                f.name.includes('共有') || f.name.includes('チーム') || f.name.includes('投稿')
+            );
+
+            let diagram = 'flowchart TD\n';
+            diagram += '    A[アプリ起動] --> B{初回起動?}\n';
+
+            if (hasAuth) {
+                diagram += '    B -->|Yes| C[オンボーディング]\n';
+                diagram += '    C --> D[ログイン/登録]\n';
+                diagram += '    D --> E[ホーム画面]\n';
+                diagram += '    B -->|No| E\n';
+            } else {
+                diagram += '    B -->|Yes| C[オンボーディング]\n';
+                diagram += '    C --> E[ホーム画面]\n';
+                diagram += '    B -->|No| E\n';
+            }
+
+            diagram += '    E --> F[メイン機能を使用]\n';
+            diagram += '    F --> G{完了?}\n';
+            diagram += '    G -->|No| F\n';
+            diagram += '    G -->|Yes| H[結果確認/保存]\n';
+            diagram += '    H --> E\n';
+
+            return diagram;
+        }
+
+        function generateScreenDiagram(analysis) {
+            let diagram = 'flowchart LR\n';
+
+            const screenIds = analysis.screens.map((s, i) => ({
+                id: String.fromCharCode(65 + i),
+                name: s.name,
+                icon: s.icon
+            }));
+
+            // ノード定義
+            screenIds.forEach(s => {
+                diagram += `    ${s.id}[${s.icon} ${s.name}]\n`;
+            });
+
+            // 接続（ホームを中心に）
+            if (screenIds.length > 1) {
+                const home = screenIds[0];
+                screenIds.slice(1).forEach(s => {
+                    diagram += `    ${home.id} --> ${s.id}\n`;
+                });
+            }
+
+            return diagram;
+        }
+
+        async function renderMermaidDiagrams() {
+            const elements = document.querySelectorAll('.mermaid');
+            for (const element of elements) {
+                const graphDefinition = element.textContent;
+                const { svg } = await mermaid.render('mermaid-' + Math.random().toString(36).substr(2, 9), graphDefinition);
+                element.innerHTML = svg;
+            }
+        }
+    </script>
+</body>
+</html>
